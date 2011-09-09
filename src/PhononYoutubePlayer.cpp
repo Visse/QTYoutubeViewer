@@ -109,7 +109,10 @@ void PhononYoutubePlayer::TooglePlay() {
     if( mPlaying )
         Pause();
     else
+    {
+        mMedia->seek(0);
         Play();
+    }
 }
 
 void PhononYoutubePlayer::Stop() {
@@ -196,7 +199,7 @@ void PhononYoutubePlayer::PlayVideo(QString ID) {
     mMedia->clear();
     mMedia->setCurrentSource(Phonon::MediaSource(mStream));
     mMedia->currentSource().setAutoDelete(true);
-    mMedia->play();
+    //mMedia->play();
 
 
 }

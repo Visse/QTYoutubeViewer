@@ -12,7 +12,7 @@
   * it does NOT sort the items!
 */
 
-#define __THROW_OUT_OF_RANGE__ throw( std::out_of_range(QString("%1:%2:%4").arg(__FUNCTION__,__FILE__,QString::number(__LINE__)).toStdString()) )
+#define __THROW_OUT_OF_RANGE__ throw( std::out_of_range(QString("%1:%2:%3").arg(__FUNCTION__,__FILE__,QString::number(__LINE__)).toStdString()) )
 
 template< class KeyType, class ValueType >
 class KeyList {
@@ -71,6 +71,18 @@ public:
         return _FindValue(Value) != mItems.end();
     }
 
+
+    ValueType& takeFirst() throw(std::out_of_range) {
+        if( mItems.isEmpty() )
+            __THROW_OUT_OF_RANGE__;
+        return mItems.takeFirst().second;
+    }
+
+    QPair<KeyType,ValueType> takeFirstPair() throw(std::out_of_range) {
+        if( mItems.isEmpty() )
+            __THROW_OUT_OF_RANGE__;
+        return mItems.takeFirst();
+    }
 
     ValueType& at( uint i ) throw(std::out_of_range) {
         if( i < mItems.size() )
