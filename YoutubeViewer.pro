@@ -50,3 +50,11 @@ FORMS    += ui/mainwindow.ui
 INCLUDEPATH += include/
 
 RESOURCES += rc.qrc
+
+OTHER_FILES += \
+    Resources/YD_Icon.png \
+    Resources/Prev.png \
+    Resources/Play.png \
+    Resources/Pause.png \
+    Resources/Next.png \
+    Resources/image-missing.jpg

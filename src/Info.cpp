@@ -254,12 +254,12 @@ void Feed<Type>::FixInfo()
 
 
 PlaylistFeed::PlaylistFeed()
-    :Feed(), BaseInfo(), Type(FT_Unown)
+    :Feed<VideoFeedPtr>(), BaseInfo(), Type(FT_Unown)
 {
 }
 
 PlaylistFeed::PlaylistFeed( const PlaylistFeed& Copy )
-    :Feed(), BaseInfo()
+    :Feed<VideoFeedPtr>(), BaseInfo()
 {
     (*this) = Copy;
 }
@@ -268,13 +268,13 @@ PlaylistFeed& PlaylistFeed::operator = ( const PlaylistFeed& Copy )
 {
     Type = Copy.Type;
 
-    Feed::operator =(Copy);
+    Feed<VideoFeedPtr>::operator =(Copy);
     BaseInfo::operator =(Copy);
 }
 
 void PlaylistFeed::FixInfo()
 {
-    Feed::FixInfo();
+    Feed<VideoFeedPtr>::FixInfo();
     BaseInfo::FixInfo();
 }
 
