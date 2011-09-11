@@ -12,6 +12,7 @@
 
 #include "Log.h"
 
+
 inline QString FromUrlEscape( const QString& String ) {
     return QUrl::fromEncoded(String.toLocal8Bit()).toString();
 }
@@ -33,7 +34,7 @@ struct VideoFormat {
 /// Youtube videoformats, i got the information from:
 /// http://en.wikipedia.org/wiki/YouTube#Quality_and_codecs
 
-static const VideoFormat Formats[] {
+static const VideoFormat Formats[] = {
             VideoFormat("FLV", 400, 240, 0.25, 64, 5),
             VideoFormat("FLV", 640, 360, 0.5, 128, 34),
             VideoFormat("FLV", 854, 480, 1.0, 128, 35),
@@ -62,27 +63,31 @@ PhononYoutubePlayer::PhononYoutubePlayer(QWidget *parent) :
     mMedia(0),
     mAudio(0),
     mVideo(0),
-    mPlayPause(0)
+    //mPlayPause(0),
+    mStream(0),
+    mControlls(0)
 {
     mMedia = new Phonon::MediaObject(this);
+
 
     mAudio = new Phonon::AudioOutput(this);
     mVideo = new Phonon::VideoWidget(this);
 
 
+    mControlls = new VideoController(this);
+        mControlls->setMediaObject(mMedia, mAudio);
+
     setMinimumSize(200,200);
-
-
 
 
     Phonon::createPath( mMedia, mVideo );
     Phonon::createPath( mMedia, mAudio );
 
 
-    mPlayPause = new QToolButton(this);
+   /* mPlayPause = new QToolButton(this);
 
     mPlayPause->setText("Play/Pause");
-    connect( mPlayPause, SIGNAL(clicked()), SLOT(TooglePlay()) );
+    connect( mPlayPause, SIGNAL(clicked()), SLOT(TooglePlay()) );*/
 
 
 
@@ -117,6 +122,9 @@ void PhononYoutubePlayer::TooglePlay() {
 
 void PhononYoutubePlayer::Stop() {
     mPlaying = false;
+
+    mMedia->stop();
+    mMedia->clear();
 }
 
 void PhononYoutubePlayer::readyReadError() {
@@ -194,21 +202,28 @@ void PhononYoutubePlayer::PlayVideo(QString ID) {
     }
 
 
+
     mStream = new VideoStreamer(Urls,NetworkMgr,this);
 
-    mMedia->clear();
-    mMedia->setCurrentSource(Phonon::MediaSource(mStream));
-    mMedia->currentSource().setAutoDelete(true);
-    //mMedia->play();
+    Phonon::MediaSource Source( mStream );
 
+    Source.setAutoDelete(true);
+    //mMedia->clear();
+    Stop();
+    mMedia->setCurrentSource(Source);
 
+    Play();
+    return;
 }
 void PhononYoutubePlayer::resizeEvent(QResizeEvent *event)
 {
     QSize Size = event->size();
+
+    Size.setHeight(Size.height()-30);
     mVideo->resize(Size);
 
-    mPlayPause->setGeometry(0,Size.height()-30,100,30);
+    //mPlayPause->setGeometry(0,Size.height()-30,100,30);
+    mControlls->setGeometry(0, Size.height(), Size.width(), 30 );
 
     QWidget::resizeEvent(event);
 }
@@ -308,4 +323,12 @@ void PhononYoutubePlayer::ReadyReadVideoInfo() {
     mMedia->currentSource().setAutoDelete(true);
     mMedia->play();
 
+}
+
+void PhononYoutubePlayer::EnqueVideo(QString ID) {
+    /// @todo
+}
+
+void PhononYoutubePlayer::Next() {
+    /// @todo
 }

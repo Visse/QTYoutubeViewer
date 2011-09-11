@@ -7,20 +7,16 @@
 #include <QStringList>
 #include <QNetworkCookieJar>
 
-
 #include <QNetworkAccessManager>
 
 #include "KeyList.h"
 
-#include "Log.h"
-
-#include <QNetworkRequest>
-
-#include <Phonon/StreamInterface>
 
 typedef QList<QUrl> QUrlList;
 
-// My compiler start to give me linking errors with out the 'static' key word...
+/// My compiler start to give me linking errors with out the 'static' key word...
+/// This function splits up a string using QString::Split and those strings are split up to 2 new strings, 1 key and 1 value string
+/// And put those in a KeyList
 static KeyList< QString, QString > SplitToList( QString String, QString ItemSplit, QString KeySplit, bool Simplifed=false ) {
     KeyList< QString, QString > Map;
 
@@ -41,11 +37,15 @@ static KeyList< QString, QString > SplitToList( QString String, QString ItemSpli
     return Map;
 }
 
-/*
- * I now there is easier way to stream a video than doing it with sockets,
- * but i want more controll than I got with QTs NetworkManager & Networkreply
- * and... I realy like to learn new ways of doing thing :P
-*/
+/**
+  * I now there is easier way to stream a video than doing it with sockets,
+  * but i want more controll than I got with QTs NetworkManager & Networkreply
+  * and... I realy like to learn new ways of doing thing :P
+  * @todo Add function for speed limits, and some buffering...
+  * For example if you check the network traffic then you watching a video on youtube,
+  * you see that first it goes up towards max, then it buffering, then it goes down
+  * and keep that speed until the video is fully buffered OR the user seeks the video.
+  */
 class VideoStreamer : public Phonon::AbstractMediaStream {
     Q_OBJECT
 public:
@@ -57,22 +57,21 @@ public:
 
 
 
-    ~VideoStreamer();
+    virtual ~VideoStreamer();
 
 protected:
     virtual void reset();
 
     virtual void needData();
+    virtual void enoughData();
 
-    void seekStream(qint64 offset);
+    virtual void seekStream(qint64 offset);
 
     bool ConnectToHost(QUrl Url, int timeout=5000);
 
+
     QByteArray mBuffer;
-
-
     quint64 mBufferOffset, mCurOffset;
-
 
 /// if the first url is not soutable it tries the next one...
     QUrlList mUrls;
@@ -86,6 +85,9 @@ protected:
 
     QTcpSocket *mSocket;
 
+    /**
+      * Just a simple struct, designed to make my life easier :)
+      */
     struct Header {
         Header()
             :ResponceCode(-1), Info() {}
@@ -97,7 +99,8 @@ protected:
 
     QNetworkCookieJar *mCookies;
 
-    QByteArray genHeader(QUrl VideoUrl ) const;
+
+    QByteArray genHeader( QUrl VideoUrl ) const;
     QByteArray genHEAD(QUrl VideoUrl) const;
 protected slots:
     /// The header of the video stream is resived

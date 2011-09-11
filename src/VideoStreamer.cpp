@@ -4,6 +4,9 @@
 
 
 #include "Log.h"
+// if you lower this you get a more even network usage
+#define BUFFERSIZE 1024*1024 /// 1 MB
+
 VideoStreamer::VideoStreamer( QUrl VideoUrl, QNetworkAccessManager *NetworkMgr, QObject *Parent ) :
     Phonon::AbstractMediaStream(Parent),
     mBuffer(),
@@ -19,7 +22,7 @@ VideoStreamer::VideoStreamer( QUrl VideoUrl, QNetworkAccessManager *NetworkMgr, 
 {
     mUrls.push_back(VideoUrl);
     mSocket = new QTcpSocket(this);
-    mSocket->setReadBufferSize(4194304);/// a 4 MB buffer size ( 1024*1024*4 )
+    mSocket->setReadBufferSize(BUFFERSIZE);
 
     mCurrentUrl = mUrls.first();
     if( !ConnectToHost(mCurrentUrl) ) {
@@ -50,9 +53,7 @@ VideoStreamer::VideoStreamer( QUrlList VideoUrls, QNetworkAccessManager *Network
     mCookies(0)
 {
     mSocket = new QTcpSocket(this);
-    // I choosed 4 MB becase I didn't want to stress the internet connection more than nessisery
-    // But I really don't now if it has anny affect
-   // mSocket->setReadBufferSize(4194304);/// a 4 MB buffer size ( 1024*1024*4 )
+    mSocket->setReadBufferSize(BUFFERSIZE);
 
     mCurrentUrl = mUrls.first();
     if( !ConnectToHost(mCurrentUrl) ) {
@@ -63,6 +64,9 @@ VideoStreamer::VideoStreamer( QUrlList VideoUrls, QNetworkAccessManager *Network
     mSocket->write( genHEAD(mCurrentUrl) );
     connect( mSocket, SIGNAL(readyRead()), SLOT(HeaderResived()) );
 
+    /// For some reason this does not work, the MediaObject does not reconize that the stream is seekable :(
+    /// I belelive i found the reason, there is a bug in phonon then using the default gstreamer backend,
+    /// But... I cant find any guid to change the backend...
     setStreamSeekable(true);
 
 }
@@ -130,18 +134,21 @@ void VideoStreamer::reset() {
 
 void VideoStreamer::needData(){
 
-    if( !mFoundStream ) {
-        mReadData = true;
-        return;
-    }
-
     mReadData = true;
+    if( !mFoundStream )
+        return;
 
-    if( mCurOffset < (mBuffer.size()+mBufferOffset) ) {
-        QByteArray Data = mBuffer.mid(mCurOffset-mBufferOffset);
-        writeData(Data);
-        mCurOffset += Data.size();
-    }
+    ReadyRead();
+
+/*
+    if( (!mCurOffset < (mBuffer.size()+mBufferOffset) ))
+        mBuffer.append( mSocket->readAll() );
+
+    QByteArray Data = mBuffer.mid(mCurOffset-mBufferOffset);
+    if( Data.isEmpty() )
+        return;
+    writeData(Data);
+    mCurOffset += Data.size();*/
 }
 
 void VideoStreamer::seekStream( qint64 offset ) {
@@ -227,8 +234,10 @@ void VideoStreamer::HeaderResived() {
 
         if( Head.Info.countains("Content-Length") ) {
             qint64 StreamLength = Head.Info.value("Content-Length").toInt(&Ok);
-            if( Ok )
+            if( Ok ) {
+                mBuffer.reserve(StreamLength+1024);// Just some pading so it won't reserve more at the end..
                 setStreamSize(StreamLength);
+            }
             else {
                 Error( "Failed to parse Content-Length!" );
                 setStreamSize(-1);
@@ -245,6 +254,7 @@ void VideoStreamer::HeaderResived() {
             mBuffer.append(Data.mid(QString(Data).split("\r\n\r\n").first().size()+5));
             mFoundStream = true;
 
+
             connect( mSocket, SIGNAL(readyRead()), SLOT(ReadyRead()) );
         }
 
@@ -257,13 +267,25 @@ void VideoStreamer::HeaderResived() {
 }
 
 void VideoStreamer::ReadyRead() {
+    // If we don't have open a stream, or we don't need any data
+    // We do not read from the socket, and saves some internet traffic
     if( !(mReadData && mFoundStream) )
         return;
 
     mBuffer.append(mSocket->readAll());
-    QByteArray Data = mBuffer.mid(mCurOffset-mBufferOffset, 4096 );
-    if( Data.size() < 4096 )
+    QByteArray Data = mBuffer.mid( mCurOffset-mBufferOffset );
+    if( Data.isEmpty() )
         return;
     writeData(Data);
     mCurOffset += Data.size();
+
+
+    if( streamSize() > 0 && (mCurOffset >= streamSize() ) )
+        endOfData();
 }
+
+void VideoStreamer::enoughData() {
+    mReadData = false;
+}
+
+

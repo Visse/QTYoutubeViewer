@@ -18,7 +18,8 @@ TEMPLATE = app
 SOURCES += src/image.cpp \
     src/InfoManager.cpp \
     src/PhononYoutubePlayer.cpp \
-    src/VideoStreamer.cpp
+    src/VideoStreamer.cpp \
+    src/VideoController.cpp
 SOURCES += src/Info.cpp
 SOURCES += src/ListElement.cpp
 SOURCES += src/Log.cpp
@@ -33,7 +34,8 @@ HEADERS  += include/image.h \
     include/PhononYoutubePlayer.h \
     include/VideoStreamer.h \
     include/ColorsFuncs.h \
-    include/KeyList.h
+    include/KeyList.h \
+    include/VideoController.h
 HEADERS  += include/Info.h
 HEADERS  += include/ListElement.h
 HEADERS  += include/Log.h

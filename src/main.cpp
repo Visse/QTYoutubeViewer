@@ -13,8 +13,22 @@ SettingManager Settings;
 int main(int argc, char *argv[])
 {
 
+    QPalette Palette;
+
     Settings.loadSettings();
     QApplication a(argc, argv);
+
+    a.setApplicationName("Youtube Viewer");
+
+    Palette = QApplication::palette();
+    {
+        Palette.setColor(QPalette::Base, QColor(80, 80, 80));
+        Palette.setColor(QPalette::Window, QColor(120, 120, 120));
+    }
+
+    a.setPalette(Palette);
+
+
     MainWindow w;
     w.show();
 

@@ -9,4 +9,10 @@
     <qresource prefix="/">
         <file>Resources/image-missing.jpg</file>
     </qresource>
+    <qresource prefix="/VideoController">
+        <file alias="Next.png">Resources/Next.png</file>
+        <file alias="Pause.png">Resources/Pause.png</file>
+        <file alias="Play.png">Resources/Play.png</file>
+        <file alias="Previus.png">Resources/Prev.png</file>
+    </qresource>
 </RCC>

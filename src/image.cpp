@@ -31,7 +31,9 @@ void Image::setImage( const QPixmap *Image)
         //updateGeometry();
         //update();
 
-        QPixmap Pixmap = Image->scaled(size(), Qt::KeepAspectRatio );
+        QPixmap Pixmap = Image->scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+
+
         setPixmap( Pixmap );
     }
     else
