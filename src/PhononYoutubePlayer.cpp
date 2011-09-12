@@ -137,6 +137,7 @@ void PhononYoutubePlayer::PlayVideo(QString ID) {
 
 */
 
+    mLog.LogMessage( "Playing videoID: "+ID );
     static char* Modes[] = {"&el=embedded", "&el=detailpage", "&el=vevo", ""};
 
     QMap< int, QUrl > FeedUrls;
@@ -197,7 +198,7 @@ void PhononYoutubePlayer::PlayVideo(QString ID) {
 
     mStream = new VideoStreamer(Urls,NetworkMgr,this);
 
-    Phonon::MediaSource Source( mStream );
+    Phonon::MediaSource Source(mStream);
 
     Source.setAutoDelete(true);
     //mMedia->clear();

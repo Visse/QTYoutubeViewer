@@ -15,11 +15,11 @@ TARGET = YoutubeViewer
 TEMPLATE = app
 
 
-SOURCES += src/image.cpp \
-    src/InfoManager.cpp \
-    src/PhononYoutubePlayer.cpp \
-    src/VideoStreamer.cpp \
-    src/VideoController.cpp
+SOURCES += src/image.cpp
+SOURCES += src/InfoManager.cpp
+SOURCES += src/PhononYoutubePlayer.cpp
+SOURCES += src/VideoStreamer.cpp
+SOURCES += src/VideoController.cpp
 SOURCES += src/Info.cpp
 SOURCES += src/ListElement.cpp
 SOURCES += src/Log.cpp
@@ -29,13 +29,13 @@ SOURCES += src/Parser3.cpp
 SOURCES += src/SettingManager.cpp
 SOURCES += src/ThumbnailsHandler2.cpp
 
-HEADERS  += include/image.h \
-    include/InfoManager.h \
-    include/PhononYoutubePlayer.h \
-    include/VideoStreamer.h \
-    include/ColorsFuncs.h \
-    include/KeyList.h \
-    include/VideoController.h
+HEADERS  += include/image.h
+HEADERS  += include/InfoManager.h
+HEADERS  += include/PhononYoutubePlayer.h
+HEADERS  += include/VideoStreamer.h
+HEADERS  += include/ColorsFuncs.h
+HEADERS  += include/KeyList.h
+HEADERS  += include/VideoController.h
 HEADERS  += include/Info.h
 HEADERS  += include/ListElement.h
 HEADERS  += include/Log.h

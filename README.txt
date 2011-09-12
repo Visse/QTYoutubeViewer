@@ -4,6 +4,7 @@ Lisence: GPL v3 [ http://www.gnu.org/licenses/gpl-3.0-standalone.html#terms ]
 This program is currently in an early Alpha stage, its unstable, atleast the play function is :(
 But atleast it I am working on making it more stable :)
 
+If you missing something mail me, and I will try to add it :)
 
 *** Trouble Shooting ***
 * If every element is black, or gray make sure that the file 'Settings.cfg'
@@ -54,7 +55,6 @@ Playlist: 'playlistID'
 and if you now the user name you can write 'user:'
 
 
-
 *** WARNING ***
 The videoplayer is VERY unstable!, I been albe to track it down,
 but not solve it, I think it some kind of deadlock in GStreamer. On
@@ -73,7 +73,6 @@ And, if you wonder why I'm using sockets to stream video instead of QT's
 networkmanager, it's because I wanted more controll, and ofcourse because I
 realy like to learn new techniques.
 
-This is act
 
 
 *** TODO ***
@@ -86,6 +85,10 @@ This is act
                 wich is the default on most system, you won't be able to see much, I made a quick fix,
                 look in 'main.cpp' there I manually set up backgrounds :/
 * Add support for comments
+* Add better video buffer - ATM it just seems to lag, it is not waiting for all the data :(
+* Fix video releated and responses, the parser can't find any videos in the feeds :/
+* Add links in description, AKA then the user clicks on, for example a username, we should
+    automatic load that user ( same as user:XXXX ), but with out having to cut/past :)
 
 
 *** Contact me ***

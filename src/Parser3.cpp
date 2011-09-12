@@ -234,6 +234,7 @@ void Parser3::Search( QString String )
     if( String.startsWith("videoID:") )
     {
         String.remove("videoID:");
+        String = String.simplified();
         if( String.size() != 11 ) /// A VideoID is 11 case senitive characters
         {
             Error( "VideoID is not the right size ID["+String+"]" );
@@ -248,6 +249,7 @@ void Parser3::Search( QString String )
     else if( String.startsWith("playlistID:") )
     {
         String.remove("playlistID:");
+        String = String.simplified();
         if( String.size() != 16 )
         {
             if( String.size() == 18 && String.startsWith("PL") )
@@ -268,6 +270,7 @@ void Parser3::Search( QString String )
     else if( String.startsWith("user:") )
     {
         String.remove("user:");
+        String = String.simplified();
         Url = "http://gdata.youtube.com/feeds/api/users/"+String+"?v=2";
         BasePtr Info = new UserInfo;
         S = new Parser3_Sender( this, Info );
@@ -276,6 +279,7 @@ void Parser3::Search( QString String )
     else if( String.startsWith("video:") )
     {
         String.remove("video:");
+        String = String.simplified();
         String = String.replace(' ','+');
         Url = "http://gdata.youtube.com/feeds/api/videos?q=" + String + "&v=2&start-index=1&max-results=50";
         BasePtr Info = new VideoFeed;
@@ -294,7 +298,7 @@ void Parser3::Search( QString String )
     }
     else
     {/// Simple treat it like a video search
-        Search("video:"+String);
+        Search("video:"+String.simplified());
     }
 
     if( S )
@@ -568,12 +572,99 @@ void Parser3::UserUploadsRecived( BasePtr bInfo, QDomDocument Page )
     return;
 }
 
-void Parser3::VideoResponcesRecived( BasePtr Info, QDomDocument Page )
+void Parser3::VideoResponcesRecived( BasePtr bInfo, QDomDocument Page )
 {
+    if( !bInfo )
+    {
+        Error( "Null Pointer to Info!" );
+        return;
+    }
+    if( bInfo->getType() != IT_VideoFeed )
+    {
+        Error( "Info is not a video Responce(videofeed)!" );
+        return;
+    }
+
+    VideoFeedPtr Info = bInfo->cast_VideoFeed();
+
+    QDomNode Feed = Page.namedItem("feed");
+
+    if( Feed.isNull() )
+    {
+        Error( "Feed is null!, Maybe page is not a video Responce(videofeed)" );
+        return;
+    }
+
+    QStringList IDString = Feed.namedItem("id").namedItem("#text").nodeValue().split(':', QString::SkipEmptyParts );
+    if( IDString.size() != 5 || (IDString.at(2) != "video" && IDString.at(4) != "responses" )) {
+        Error( "Page is not a video responce!!" );
+        return;
+    }
+
+    QString Title = Info->Title;
+    ParseVideoFeed( Feed, Info );
+    /// Youtube will say that the title is some thing like "Videos responses to 'TITLE'"
+    /// But we really does not want it :)
+    if( !Title.isNull() )
+        Info->Title = Title;
+
+    // the id is const :/
+    const_cast<QString&>(Info->ID) = IDString.at(3).toLower();
+
+    // If we don't have a thumbnail, we take the first video's thumbview
+    if( !Info->UrlThumbnail.isValid() ) {
+        Info->UrlThumbnail = Info->Content.first()->UrlThumbnail;
+    }
+
+    VideosAdded(Info);
 }
 
-void Parser3::VideoReleatedRecived( BasePtr Info, QDomDocument Page )
+void Parser3::VideoReleatedRecived( BasePtr bInfo, QDomDocument Page )
 {
+    if( !bInfo )
+    {
+        Error( "Null Pointer to Info!" );
+        return;
+    }
+    if( bInfo->getType() != IT_VideoFeed )
+    {
+        Error( "Info is not a video Responce(videofeed)!" );
+        return;
+    }
+
+    VideoFeedPtr Info = bInfo->cast_VideoFeed();
+
+    QDomNode Feed = Page.namedItem("feed");
+
+    if( Feed.isNull() )
+    {
+        Error( "Feed is null!, Maybe page is not a video Releated(videofeed)" );
+        return;
+    }
+
+    QStringList IDString = Feed.namedItem("id").namedItem("#text").nodeValue().split(':', QString::SkipEmptyParts );
+    if( IDString.size() != 5 || (IDString.at(2) != "video" && IDString.at(4) != "related" )) {
+        Error( "Page is not a video Releated!!" );
+        return;
+    }
+
+    QString Title = Info->Title;
+    ParseVideoFeed( Feed, Info );
+    /// Youtube will say that the title is some thing like "Videos related to 'TITLE'"
+    /// But we really does not want it :)
+    if( !Title.isNull() )
+        Info->Title = Title;
+
+    // the id is const :/
+    const_cast<QString&>(Info->ID) = IDString.at(3).toLower();
+
+    // If we don't have a thumbnail, we take the first video's thumbview
+    if( !Info->UrlThumbnail.isValid() ) {
+        Info->UrlThumbnail = Info->Content.first()->UrlThumbnail;
+    }
+
+    VideoFeed *vInfo = Info;
+    VideosAdded(Info);
 }
 
 void Parser3::VideoSeachRecived( BasePtr bInfo, QDomDocument Page ) {
@@ -629,6 +720,19 @@ void Parser3::ParseVideoEntry( QDomNode Node, VideoPtr Info ) {
 
     QDomNode Child = Node.firstChild();
 
+    if( Info->Releated.isNull() ) {
+        Info->Releated = new VideoFeed;
+        Info->Releated->Type = VideoFeed::FT_VideoReleated;
+        Info->Releated->ParsedPages = 0;
+        Info->Releated->HasFullFeed = false;
+    } if( Info->Responces.isNull() ) {
+        Info->Responces = new VideoFeed;
+        Info->Responces->Type = VideoFeed::FT_VideoResponses;
+        Info->Responces->ParsedPages = 0;
+        Info->Responces->HasFullFeed = false;
+    }
+
+
     while( !Child.isNull() )
     {
         QString NodeName = Child.nodeName();
@@ -645,23 +749,15 @@ void Parser3::ParseVideoEntry( QDomNode Node, VideoPtr Info ) {
             QString RelValue = Child.attributes().namedItem("rel").nodeValue();
             if( RelValue == "http://gdata.youtube.com/schemas/2007#video.responses" )
             {
-                if( Info->Releated.isNull() )
-                {
-                    Info->Releated = new VideoFeed;
-                    Info->Releated->Type = VideoFeed::FT_VideoReleated;
-                }
                 Info->Releated->NextPageInFeed = QUrl( Child.attributes().namedItem("href").nodeValue() );
             }
             else if( RelValue == "http://gdata.youtube.com/schemas/2007#video.related" )
             {
                 if( Info->Responces.isNull() )
                 {
-                    Info->Responces = new VideoFeed;
-                    Info->Responces->Type = VideoFeed::FT_VideoReleated;
-                }
                 Info->Responces->NextPageInFeed = QUrl( Child.attributes().namedItem("href").nodeValue() );
             }
-
+            }
         }
         else if( NodeName == "author" )
         {
@@ -738,7 +834,7 @@ void Parser3::ParseVideoFeed( QDomNode Node, VideoFeedPtr Info ) {
         }
         else if( NodeName == "entry" )
         {
-            VideoPtr Video = new VideoInfo;
+            VideoInfo *Video = new VideoInfo;
             ParseVideoEntry(Child,Video);
             Info->Content.push_back( Video );
         }

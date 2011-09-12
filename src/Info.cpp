@@ -97,13 +97,17 @@ void VideoInfo::FixInfo()
 
     if( !Responces.isNull() ) {
         Responces->Author = Author;
-        Responces->Title = "Responses to: " + Title;
+        Responces->Title = Title;
         Responces->UrlThumbnail = UrlThumbnail;
+
+        Responces->FixInfo();
     }
     if( !Releated.isNull() ) {
         Releated->Author = Author;
-        Releated->Title = "Releated to: " + Title;
+        Releated->Title = Title;
         Releated->UrlThumbnail = UrlThumbnail;
+
+        Releated->FixInfo();
     }
     return;
 }
@@ -331,6 +335,16 @@ QString GenerateRichText_ListElement( BasePtr Info, QColor TextColor, QColor Hei
         case( VideoFeed::FT_UserFavorites ):
         case( VideoFeed::FT_UserUploads ):
             RichText = RichText.arg("Size: ", Info->cast_VideoFeed()->sSize );
+            break;
+        case( VideoFeed::FT_VideoReleated ):
+            Mall = QString( "<font color=%1>%3</font><font color=%2>%4</font><br>" ).arg(HeighLightColor.name(), TextColor.name());
+            RichText = Mall.arg("Releated To: ", Info->Title);
+            RichText += "<br>";
+            break;
+        case( VideoFeed::FT_VideoResponses ):
+            Mall = QString( "<font color=%1>%3</font><font color=%2>%4</font><br>" ).arg(HeighLightColor.name(), TextColor.name());
+            RichText = Mall.arg("Responses To: ", Info->Title);
+            RichText += "<br>";
             break;
         default:
             break;

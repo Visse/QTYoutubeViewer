@@ -10,6 +10,7 @@ Log mLog( "YoutubeViewer.log" );
 ThumbnailsHandler2 Thumnails;
 SettingManager Settings;
 
+
 int main(int argc, char *argv[])
 {
     QPalette Palette;
@@ -18,6 +19,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     a.setApplicationName("Youtube Viewer");
+
+    int PageNr = 12445;
 
     Palette = QApplication::palette();
     {
