@@ -12,7 +12,6 @@ SettingManager Settings;
 
 int main(int argc, char *argv[])
 {
-
     QPalette Palette;
 
     Settings.loadSettings();

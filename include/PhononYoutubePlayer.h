@@ -53,7 +53,6 @@ protected slots:
 protected:
     void resizeEvent(QResizeEvent *event);
 
-    bool mPlaying;
 
     //VideoBuffer *mBuffer;
     //YoutubeStream *mStream;

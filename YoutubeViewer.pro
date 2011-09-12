@@ -57,4 +57,5 @@ OTHER_FILES += \
     Resources/Play.png \
     Resources/Pause.png \
     Resources/Next.png \
-    Resources/image-missing.jpg
+    Resources/image-missing.jpg \
+    README.txt

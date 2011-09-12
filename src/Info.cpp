@@ -126,7 +126,7 @@ VideoFeed& VideoFeed::operator = ( const VideoFeed& Copy )
 {
     Type    = Copy.Type;
     BaseInfo::operator =(Copy);
-    Feed::operator =(Copy);
+    Feed<VideoPtr>::operator =(Copy);
     return *this;
 }
 
@@ -135,7 +135,7 @@ void VideoFeed::FixInfo()
 {
     sSize = QString::number(Size);
     BaseInfo::FixInfo();
-    Feed::FixInfo();
+    Feed<VideoPtr>::FixInfo();
     return;
 }
 
@@ -248,6 +248,7 @@ void Feed<Type>::FixInfo()
 {
     sSize = QString::number(Size);
 
+    HasFullFeed = !NextPageInFeed.isValid();
 }
 
 // *************************************************************

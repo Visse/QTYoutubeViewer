@@ -224,7 +224,7 @@ void VideoStreamer::HeaderResived() {
     }
 
     switch( Head.ResponceCode ) {
-    case( 200 ): /// Responce OK
+    case( 200 ): { /// Responce OK
         if( Head.Info.value("Connection", "") == "close" ) {
             if( !ConnectToHost( mCurrentUrl ) ) {
                 Error( "Failed to connect! Url["+mCurrentUrl.toString()+"]" );
@@ -258,10 +258,42 @@ void VideoStreamer::HeaderResived() {
             connect( mSocket, SIGNAL(readyRead()), SLOT(ReadyRead()) );
         }
 
-
-
         break;
-    default:
+    } case(302): { /// Responce Found
+        if( !Head.Info.countains("Location") ) {
+            Error( "Responce code 302 without a Location header!" );
+            return;
+        }
+        QUrl NewUrl = QUrl::fromEncoded(Head.Info.value("Location","").toLocal8Bit());
+        if( !NewUrl.isValid() ) {
+            Error( QString("Responce code 302 without a valid Location header[%1]").arg(Head.Info.value("Location","")) );
+            return;
+        }
+        if( !ConnectToHost(NewUrl) ) {
+            Error( QString("Could not connect to host! Url[%1]").arg(NewUrl.toString()) );
+            return;
+        }
+        mSocket->write( genHEAD(NewUrl) );
+        mCurrentUrl = NewUrl;
+        connect( mSocket, SIGNAL(readyRead()), SLOT(HeaderResived()) );
+        break;
+    } case(403): { /// Responce Forbidden
+        if( Head.Info.countains("reason") ) {
+            Error(QString("Responce 403 - Forbidden, reason[%1]").arg(Head.Info.value("reason","")) );
+        }
+    } default:
+        Error( QString("Error ResponceCode[%1]!").arg(QString::number(Head.ResponceCode)) );
+        if( ++mCurUrl < mUrls.size() ) {
+            mLog.LogMessage(QString("Trying next url[1%]").arg(mUrls.at(mCurUrl).toString()) );
+            QUrl Url = mUrls.at(mCurUrl);
+            if( !ConnectToHost(Url) ) {
+                Error( QString("Could not connect to host! url[%1]").arg(Url.toString()) );
+                return;
+            }
+            mSocket->write( genHEAD(Url) );
+            mCurrentUrl = Url;
+            connect( mSocket, SIGNAL(readyRead()), SLOT(HeaderResived()) );
+        }
         break;
     }
 }
@@ -274,7 +306,12 @@ void VideoStreamer::ReadyRead() {
 
     mBuffer.append(mSocket->readAll());
     QByteArray Data = mBuffer.mid( mCurOffset-mBufferOffset );
-    if( Data.isEmpty() )
+
+    if( streamSize() < mCurOffset+128 ) {
+        endOfData();
+        return;
+    }
+    if( Data.size() < 128 )
         return;
     writeData(Data);
     mCurOffset += Data.size();

@@ -59,7 +59,6 @@ const VideoFormat& getFormat( int Type ) {
 
 PhononYoutubePlayer::PhononYoutubePlayer(QWidget *parent) :
     QWidget(parent),
-    mPlaying(false),
     mMedia(0),
     mAudio(0),
     mVideo(0),
@@ -101,28 +100,21 @@ PhononYoutubePlayer::~PhononYoutubePlayer() {
 }
 
 void PhononYoutubePlayer::Play() {
-    mPlaying = true;
     mMedia->play();
 }
 
 void PhononYoutubePlayer::Pause() {
-    mPlaying = false;
     mMedia->pause();
 }
 
 void PhononYoutubePlayer::TooglePlay() {
-    if( mPlaying )
+    if( mMedia->state() != Phonon::PlayingState )
         Pause();
     else
-    {
-        mMedia->seek(0);
         Play();
-    }
 }
 
 void PhononYoutubePlayer::Stop() {
-    mPlaying = false;
-
     mMedia->stop();
     mMedia->clear();
 }

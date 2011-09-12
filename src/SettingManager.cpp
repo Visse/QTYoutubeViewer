@@ -57,6 +57,13 @@ void SettingManager::loadSettings( QString FilePath ) {
     File.open(QFile::ReadOnly);
     if( !File.isOpen() ) {
         Error( "File could not be open! FilePath["+FilePath+"]" );
+
+        for( int i=0; i < sizeof(ElementType); i++ ) {
+            mColors.at(i, CT_Element ).setNamedColor( "#000" );
+            mColors.at(i, CT_Heighlighted ).setNamedColor( "#0FF" );
+            mColors.at(i, CT_NormalText ).setNamedColor( "#FFF" );
+        }
+
         return;
     }
 
@@ -143,7 +150,7 @@ void SettingManager::loadSettings( QString FilePath ) {
         Compare( "ChannelSearch-NormalText", ET_ChannelSearch, CT_NormalText );
         Compare( "ChannelSearch-HeighLight", ET_ChannelSearch, CT_Heighlighted );
 
-#undef Compare;
+#undef Compare
     }
 
     /// Check to see if all settings have been assigned a value

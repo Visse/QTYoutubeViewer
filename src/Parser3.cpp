@@ -15,6 +15,7 @@ Parser3_Sender::Parser3_Sender( QObject *parent, BasePtr Info )
 void Parser3_Sender::setInfo( BasePtr Info ) {
     bInfo = Info;
 }
+
 BasePtr Parser3_Sender::getInfo() {
     return bInfo;
 }
@@ -24,7 +25,7 @@ void Parser3_Sender::SendSignal( QDomDocument Page ) {
     return;
 }
 
-
+//// *******************************************
 
 Parser3::Parser3(QObject *parent) :
     QObject(parent), mTimer(this), mQue(), mResive(), NetworkMgr(0), ProgressBar(0)
@@ -54,15 +55,15 @@ QString ToUrlEscape( const QString& String )
     return Temp;
 }*/
 
-
 void Parser3::Update() {
+    /// While we have elements in the que and we still has space to make a request DO
     while( !mQue.isEmpty() && mResive.size() < 5 && NetworkMgr ) {
         QPair< QNetworkRequest, QPointer<Parser3_Sender> > Pair = mQue.takeFirst();
-
+        // get the reply
         QNetworkReply *Reply = NetworkMgr->get( Pair.first );
 
         mResive.insert( Reply, Pair.second );
-
+        // connect the signals to the slots :)
         connect( Reply, SIGNAL(finished()), SLOT(ReadyRead()) );
         connect( Reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(NetworkError()) );
     }
@@ -149,7 +150,7 @@ QString Parser3::extractID( QUrl U ) {
     QString Url = U.toString();
 
     UrlType Type = getUrlType( U );
-//http://www.youtube.com/playlist?list=PL72B0C484D949500C
+
     QStringList Elements = Url.split('/', QString::SkipEmptyParts);
 
     QString ID = "";
@@ -164,7 +165,7 @@ QString Parser3::extractID( QUrl U ) {
         ID = Elements.at(3);
         break;
     default:
-        std::cerr << "Unown url! cant extract ID!" << std::endl;
+        Error( QString("Unown url! cant extract ID! Url[1%]").arg(Url) );
         break;
     }
 
@@ -217,6 +218,8 @@ void Parser3::ParseUrl( QUrl U )
         S = new Parser3_Sender( this, Info );
         connect( S, SIGNAL(Signal(BasePtr,QDomDocument)), SLOT(UserRecived(BasePtr,QDomDocument)) );
         break;
+    default:
+        Error( QString("Unown url type! Url[%1]").arg(Url) );
     }
 
     mQue.push_back( qMakePair( QNetworkRequest(QUrl(Url)),QPointer<Parser3_Sender>(S)) );
@@ -331,6 +334,7 @@ void Parser3::ParseNextPage( VideoFeedPtr Feed )
         break;
     default:
         /// should newer happen
+        Error( "Something is realy messed up :/" );
         break;
     }
 
@@ -742,14 +746,15 @@ void Parser3::ParseVideoFeed( QDomNode Node, VideoFeedPtr Info ) {
         Child = Child.nextSibling();
     }
 
-    Info->FixInfo();
     Info->ParsedPages++;
+    Info->FixInfo();
     return;
 }
 
 void Parser3::ParseUserEntry( QDomNode Node, UserPtr Info ) {
     QDomNode Child = Node.firstChild();
 
+    /// Just fill it up with some video feeds, if not already assigned
     if( Info->Favorites.isNull() ) {
         Info->Favorites = new VideoFeed;
         Info->Favorites->Type = VideoFeed::FT_UserFavorites;
@@ -829,6 +834,7 @@ void Parser3::ParseUserEntry( QDomNode Node, UserPtr Info ) {
         Child = Child.nextSibling();
     }
 
+    /// Set some important information about the feeds :)
     Info->Favorites->NextPageInFeed = QUrl(QString("http://gdata.youtube.com/feeds/api/users/%1/favorites?v=2&start-index=1&max-results=50").arg(Info->Author));
     Info->Uploads->NextPageInFeed = QUrl(QString("http://gdata.youtube.com/feeds/api/users/%1/uploads?v=2&start-index=1&max-results=50").arg(Info->Author));
     Info->Playlists->NextPageInFeed = QUrl(QString("http://gdata.youtube.com/feeds/api/users/%1/playlists?v=2&start-index=1&max-results=50").arg(Info->Author));
@@ -849,12 +855,12 @@ void Parser3::ParseUserEntry( QDomNode Node, UserPtr Info ) {
     Info->Playlists->UrlAuthor = QUrl(QString("http://gdata.youtube.com/feeds/api/users/%1?v=2").arg(Info->Author));
 
 
-
+    /// The ID is const so I have to make a cast :/
     const_cast<QString&>(Info->Favorites->ID) = Info->Author+"/favorites";
     const_cast<QString&>(Info->Uploads->ID) = Info->Author+"/uploads";
     const_cast<QString&>(Info->Playlists->ID) = Info->Author+"/playlists";
 
-
     Info->FixInfo();
+
     return;
 }

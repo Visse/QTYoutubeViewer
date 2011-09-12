@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/Icons">
-        <file>Resources/arrow-left-double.png</file>
-        <file>Resources/arrow-right-double.png</file>
-        <file>Resources/download.png</file>
-        <file>Resources/task-reject.png</file>
         <file>Resources/YD_Icon.png</file>
     </qresource>
     <qresource prefix="/">
