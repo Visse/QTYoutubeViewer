@@ -14,6 +14,7 @@
 
 #include "VideoStreamer.h"
 #include "VideoController.h"
+#include "YoutubeStream.h"
 
 class PhononYoutubePlayer : public QWidget
 {
@@ -46,10 +47,6 @@ public slots:
 protected slots:
     void readyReadError();
 
-    void ReadyReadVideoInfo();
-
-    void ProgressUpdate( qint64 loaded, qint64 total );
-
 protected:
     void resizeEvent(QResizeEvent *event);
 
@@ -57,6 +54,7 @@ protected:
     //VideoBuffer *mBuffer;
     //YoutubeStream *mStream;
     VideoStreamer *mStream;
+    //YoutubeStream *mStream;
 
     VideoController *mControlls;
 

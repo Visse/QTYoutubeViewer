@@ -15,7 +15,9 @@ TARGET = YoutubeViewer
 TEMPLATE = app
 
 
-SOURCES += src/image.cpp
+SOURCES += src/image.cpp \
+    src/DownloadDialog.cpp \
+    src/YoutubeStream.cpp
 SOURCES += src/InfoManager.cpp
 SOURCES += src/PhononYoutubePlayer.cpp
 SOURCES += src/VideoStreamer.cpp
@@ -29,7 +31,9 @@ SOURCES += src/Parser3.cpp
 SOURCES += src/SettingManager.cpp
 SOURCES += src/ThumbnailsHandler2.cpp
 
-HEADERS  += include/image.h
+HEADERS  += include/image.h \
+    include/DownloadDialog.h \
+    include/YoutubeStream.h
 HEADERS  += include/InfoManager.h
 HEADERS  += include/PhononYoutubePlayer.h
 HEADERS  += include/VideoStreamer.h
@@ -44,7 +48,8 @@ HEADERS  += include/Parser3.h
 HEADERS  += include/SettingManager.h
 HEADERS  += include/ThumbnailsHandler2.h
 
-FORMS    += ui/mainwindow.ui
+FORMS    += ui/mainwindow.ui \
+    ui/DownloadDialog.ui
 
 
 INCLUDEPATH += include/

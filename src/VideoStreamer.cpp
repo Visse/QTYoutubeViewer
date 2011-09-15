@@ -184,7 +184,7 @@ VideoStreamer::Header VideoStreamer::ParseHeader( QString Responce,  bool *Ok ) 
     if( Ok )
         (*Ok) = false;
 
-    KeyList<QString,QString> Info = SplitToList( Responce, "\r\n", ":", true );
+    KeyList<QString,QString> Info = SplitToKeyList( Responce, "\r\n", ":", true );
     QString ResponceCode = Info.begin()->first;
 
     /// Well the first line is the responce, for example 'HTTP/1.1 200 OK'
@@ -251,9 +251,8 @@ void VideoStreamer::HeaderResived() {
         {
             mSocket->waitForReadyRead(3000);
             QByteArray Data = mSocket->readAll();
-            mBuffer.append(Data.mid(QString(Data).split("\r\n\r\n").first().size()+5));
+            mBuffer.append(Data.mid(QString(Data).split("\r\n\r\n").first().size()+4));
             mFoundStream = true;
-
 
             connect( mSocket, SIGNAL(readyRead()), SLOT(ReadyRead()) );
         }

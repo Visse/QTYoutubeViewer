@@ -197,6 +197,9 @@ void PhononYoutubePlayer::PlayVideo(QString ID) {
 
 
     mStream = new VideoStreamer(Urls,NetworkMgr,this);
+    /*mStream = new YoutubeStream(this);
+    mStream->setStream( getYoutubeStream(ID) );
+    mStream->startStream();*/
 
     Phonon::MediaSource Source(mStream);
 
@@ -229,94 +232,6 @@ static const char *URL_Escape_Codes[][2] = { {" ", "%20" }, {"<", "%3C" }, {">",
     {"@", "%40" }, {"=", "%3D" }, {"&", "%26" }, {"$", "%24" } };
 
 
-
-void PhononYoutubePlayer::ProgressUpdate(qint64 loaded, qint64 total) {
-   /* if( mBuffer->capacity() < total )
-        mBuffer->reserve(total);
-    if( mBuffer->bytesAvailable() > 10000 && mPlaying )
-        mMedia->play();*/
-}
-
-void PhononYoutubePlayer::ReadyReadVideoInfo() {
-/*
-    I learnt this by reading the source to a program called 'youtube-dl' ( http://rg3.github.com/youtube-dl/documentation.html )
-    It's python and well... i am not so very good at phython, but i succeaded to convert it to c++ and qt, and here are the result:
-
-    its still pretty buggy, but i'm working on it..
-*/
-
-   QNetworkReply *reply = static_cast<QNetworkReply*>(sender());
-
-    QString InfoString = reply->readAll();
-
-    QStringList InfoList = InfoString.split('&', QString::SkipEmptyParts);
-
-    QMap< int, QUrl > FeedUrls;
-
-
-    for( int i=0; i < InfoList.size(); i++ ) {
-        if( InfoList.at(i).startsWith("url_encoded_fmt_stream_map=") )
-        {
-            /// Yea I now, i suck at name varibles...
-            QString Encoded_Fmt_Stream_Map = InfoList.at(i);
-            Encoded_Fmt_Stream_Map.remove(0,27);
-
-            // "url%3D" == "url="
-            QStringList FmtStreamMap = Encoded_Fmt_Stream_Map.split("url%3D", QString::SkipEmptyParts);
-
-            for( int i=0; i < FmtStreamMap.size(); i++ ) {
-                QString Url = FmtStreamMap.at(i);
-
-                /// Youtube have url escaped a url escaped url :P
-
-                Url = FromUrlEscape(Url);
-                Url = FromUrlEscape(Url);
-
-                /// The format of the stream is last in the url, so we have to remove it
-                QStringList UrlMap = Url.split('/');
-                QString Format = FromUrlEscape( UrlMap.takeLast() );/// The format also has to be removed from the url
-                Url = UrlMap.join("/");/// put every thing back together
-
-
-                /// A Format looks like this  [webm;+codecs="vp8.0,+vorbis"&itag=45]
-                int FmtFormat = Format.split('&').last().split('=').last().remove(',').toInt();
-
-
-                FeedUrls.insert(FmtFormat, QUrl::fromEncoded(Url.toAscii()) );
-
-            }
-        }
-    }
-
-    QUrl Url;
-    if( FeedUrls.contains(44) ) {
-        Url = FeedUrls.value(44);
-    }
-    else
-        Url = *(FeedUrls.end()-1);
-
-    QString LogString="Avalible formats for video {\n";
-    for( int i=0; i<FeedUrls.size(); i++ ) {
-        LogString += QString("[%1, %2]\n").arg(QString::number(FeedUrls.keys().at(i)), (QString)FeedUrls.values().at(i).toEncoded());
-    }
-
-    LogString += '}';
-    mLog.LogMessage(LogString);
-
-    QUrlList Urls;
-
-    foreach( QUrl VideeoUrl, FeedUrls.values() ) {
-        Urls.push_front( VideeoUrl );
-    }
-
-
-    mStream = new VideoStreamer(Urls,NetworkMgr);//new YoutubeStream( Url, NetworkMgr, this );
-
-    mMedia->setCurrentSource(Phonon::MediaSource(mStream));
-    mMedia->currentSource().setAutoDelete(true);
-    mMedia->play();
-
-}
 
 void PhononYoutubePlayer::EnqueVideo(QString ID) {
     /// @todo

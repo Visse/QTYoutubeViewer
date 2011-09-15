@@ -14,28 +14,6 @@
 
 typedef QList<QUrl> QUrlList;
 
-/// My compiler start to give me linking errors with out the 'static' key word...
-/// This function splits up a string using QString::Split and those strings are split up to 2 new strings, 1 key and 1 value string
-/// And put those in a KeyList
-static KeyList< QString, QString > SplitToList( QString String, QString ItemSplit, QString KeySplit, bool Simplifed=false ) {
-    KeyList< QString, QString > Map;
-
-    QStringList Items = String.split(ItemSplit);
-    for( int i=0; i < Items.size(); i++ ) {
-        if( Items.isEmpty() )
-            continue;
-
-        QStringList Item = Items.at(i).split(KeySplit);
-
-        QString Key = Item.takeFirst();
-        // if we had more than 1 keySplit in it we have to put every thing back together
-        if( Simplifed )
-            Map.insert(Key.simplified(), Item.join(KeySplit).simplified());
-        else
-            Map.insert(Key, Item.join(KeySplit));
-    }
-    return Map;
-}
 
 /**
   * I now there is easier way to stream a video than doing it with sockets,

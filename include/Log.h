@@ -40,4 +40,7 @@ extern Log mLog;
 // This will print the string 'This is a string: [123], but it is also a number' to the log
 #define Error2( Message, args...) Error(QString(Message).arg(args))
 
+// same ass Error2, with Warining instead
+#define Warning2( Message, args... ) Warning(QString(Message).arg(args))
+
 #endif // LOG_H
