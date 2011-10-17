@@ -3,7 +3,7 @@
 
 DownloadDialog::DownloadDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DownloadDialog)
+    ui(new Ui::Dialog)
 {
     ui->setupUi(this);
 }
@@ -11,4 +11,8 @@ DownloadDialog::DownloadDialog(QWidget *parent) :
 DownloadDialog::~DownloadDialog()
 {
     delete ui;
+}
+
+void DownloadDialog::setVideoID(QString ID) {
+
 }

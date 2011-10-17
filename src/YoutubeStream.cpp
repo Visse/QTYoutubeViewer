@@ -110,10 +110,11 @@ Stream getYoutubeStream( QString VideoID, int maxQuality ) {
 }
 
 YoutubeStream::YoutubeStream(QObject *parent) :
-    QIODevice(parent),
+    QObject(parent),//QIODevice(parent),
     mStreamSize(0), mReadPos(0), mBufferOffsett(0),
     mStreamOpen(false), mStreamFound(false),
-    mSocket(0), mBuffer(), mStream()
+    mSocket(0), //mBuffer(),
+    mStream()
 {
     mSocket = new QTcpSocket(this);
 
@@ -155,8 +156,8 @@ void YoutubeStream::ReadyReadHeader() {
         mStreamFound = true;
         mStreamOpen = false;
 
-        if( mStreamSize != -1 )
-            mBuffer.reserve( mStreamSize );
+        //if( mStreamSize != -1 )
+            //mBuffer.reserve( mStreamSize );
         startStream();
         break;
     case( 302 ): // Found
@@ -172,6 +173,7 @@ void YoutubeStream::ReadyReadHeader() {
 
 }
 
+
 void YoutubeStream::ReadyReadStream() {
     /// The stream is not open get!
     /// it's problily something else, like a header
@@ -179,13 +181,12 @@ void YoutubeStream::ReadyReadStream() {
         return;
 
     QByteArray Data = mSocket->readAll();
-    /// the easiest would just to append the new data, but what if you wan't to seek the stream to?
-    /// With out throw away that you allready have, like youtube does,
-    /// Then you seek forward it just throws it away and start buffering again :(
-    mBuffer.append( Data );
+    //mBuffer.append( Data );
 
-    bytesWritten(Data.size());
-    readyRead();
+    mFile->write(Data);
+
+    //bytesWritten(Data.size());
+    //readyRead();
 
 
     return;
@@ -213,11 +214,15 @@ void YoutubeStream::startStream() {
         return;
     }
 
-    ParseHeader( mSocket->readAll(), mBuffer, &mStreamOpen );
+    QByteArray Data;
+    ParseHeader( mSocket->readAll(), Data, &mStreamOpen );
+    if( !mStreamOpen )
+        return;
+    mFile->write(Data);
 
     connect( mSocket, SIGNAL(readyRead()), SLOT(ReadyReadStream()) );
 }
-
+/*
 bool YoutubeStream::seek(qint64 pos) {
     // the position has to be between the start of the stream and the end
     if( pos >= mBufferOffsett && pos <= (mBuffer.size()+mBufferOffsett) ) {
@@ -228,9 +233,9 @@ bool YoutubeStream::seek(qint64 pos) {
     }
     return true;
 }
-
+*/
 qint64 YoutubeStream::readData(char *dest, qint64 maxlen) {
-    /// If we have found the stream, but not started it, start it now;
+    /*/// If we have found the stream, but not started it, start it now;
     if( !mStreamOpen && mStreamFound ) {
         startStream();
         return 0; /// We havent been able to read anything yet.
@@ -241,17 +246,17 @@ qint64 YoutubeStream::readData(char *dest, qint64 maxlen) {
     memcpy( dest, Data.data(), Data.length() );
     // dont forget to advance :)
     mReadPos += Data.size();
-    return Data.size();
+    return Data.size();*/
 }
 
-void YoutubeStream::setStream(Stream YoutubeStream) {
+void YoutubeStream::setStream(Stream YoutubeStream, QFile *File) {
     if( mStreamOpen ) {
         Error( "Stream allready open!" );
         return;
     }
 
     mStreamFound = false;
-
+    mFile = File;
     mStream = YoutubeStream;
     if( !ConnectToHost() ) {
         Error( "Could not connect to host!" );

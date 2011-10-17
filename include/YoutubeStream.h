@@ -8,6 +8,8 @@
 
 #include "KeyList.h"
 
+#include <QFile>
+
 class QTcpSocket;
 
 typedef QList<QNetworkCookie> CookieList;
@@ -42,7 +44,7 @@ Stream  getYoutubeStream( QString VideoID, int maxQuality=-1 );
   * The first try to read data will open up the stream that you have setThrue setStream
   * if you don't want this, call startStream after you have cald setStream :)
   */
-class YoutubeStream : public QIODevice
+class YoutubeStream : public QObject
 {
     Q_OBJECT
 public:
@@ -62,11 +64,11 @@ public:
       * depending on internet connection, about 100 to 200 millisecond,
       * at most a couple of seconds :(
       */
-    void setStream( Stream YoutubeStream );
+    void setStream( Stream YoutubeStream, QFile *File );
 
     void startStream();
 
-    bool isSequential() const {
+   /* bool isSequential() const {
         return true;
     }
 
@@ -94,6 +96,7 @@ public:
     virtual qint64 bytesToWrite() const {
         return 0;
     }
+    */
 signals:
 
 public slots:
@@ -134,7 +137,8 @@ protected:
 
     QTcpSocket *mSocket;
 
-    QByteArray mBuffer;
+    //QByteArray mBuffer;
+    QFile *mFile;
 
     Stream mStream;
 };

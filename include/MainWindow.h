@@ -12,6 +12,8 @@
 
 #include "PhononYoutubePlayer.h"
 
+#include "DownloadDialog.h"
+
 namespace Ui {
     class MainWindow;
 }
@@ -38,6 +40,8 @@ protected:
     BasePtr mCurContent;
 
     PhononYoutubePlayer *mPlayer;
+
+    DownloadDialog *mDownload;
 public slots:
     void SearchButton_Clicked();
     void InputChanged( QString Input );
@@ -60,6 +64,7 @@ public slots:
 
     /// Buttons
     void Play_Clicked();
+    void Download_Clicked();
 
 private:
     Ui::MainWindow *ui;

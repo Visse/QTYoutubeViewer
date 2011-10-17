@@ -7,7 +7,7 @@
 // if you lower this you get a more even network usage
 #define BUFFERSIZE 1024*1024 /// 1 MB
 
-VideoStreamer::VideoStreamer( QUrl VideoUrl, QNetworkAccessManager *NetworkMgr, QObject *Parent ) :
+VideoStreamer::VideoStreamer( QUrl VideoUrl, QObject *Parent ) :
     Phonon::AbstractMediaStream(Parent),
     mBuffer(),
     mBufferOffset(0),
@@ -29,7 +29,7 @@ VideoStreamer::VideoStreamer( QUrl VideoUrl, QNetworkAccessManager *NetworkMgr, 
         Error(QString("Could not connect to host! host(%1)").arg(mUrls.first().host()));
     }
 
-    mCookies = NetworkMgr->cookieJar();
+    //mCookies = NetworkMgr->cookieJar();
     mSocket->write( genHEAD(mCurrentUrl) );
     connect( mSocket, SIGNAL(readyRead()), SLOT(HeaderResived()) );
 
@@ -39,7 +39,7 @@ VideoStreamer::VideoStreamer( QUrl VideoUrl, QNetworkAccessManager *NetworkMgr, 
 /// All the urls in VideoUrls should point at the same video, AKA it's NOT a playlist
 /// If we can't get a stream out of the first on, we tries the second one
 /// and if it still does not work we tries the third one and so on...
-VideoStreamer::VideoStreamer( QUrlList VideoUrls, QNetworkAccessManager *NetworkMgr, QObject* Parent ) :
+VideoStreamer::VideoStreamer( QUrlList VideoUrls, QObject* Parent ) :
     Phonon::AbstractMediaStream(Parent),
     mBuffer(),
     mBufferOffset(0),
@@ -60,7 +60,7 @@ VideoStreamer::VideoStreamer( QUrlList VideoUrls, QNetworkAccessManager *Network
         Error(QString("Could not connect to host! host(%1)").arg(mUrls.first().host()));
     }
 
-    mCookies = NetworkMgr->cookieJar();
+    //mCookies = NetworkMgr->cookieJar();
     mSocket->write( genHEAD(mCurrentUrl) );
     connect( mSocket, SIGNAL(readyRead()), SLOT(HeaderResived()) );
 
@@ -306,17 +306,17 @@ void VideoStreamer::ReadyRead() {
     mBuffer.append(mSocket->readAll());
     QByteArray Data = mBuffer.mid( mCurOffset-mBufferOffset );
 
-    if( streamSize() < mCurOffset+128 ) {
+    if( streamSize() < mCurOffset+512 ) {
         endOfData();
         return;
     }
-    if( Data.size() < 128 )
+    if( Data.size() < 512 )
         return;
     writeData(Data);
     mCurOffset += Data.size();
 
 
-    if( streamSize() > 0 && (mCurOffset >= streamSize() ) )
+    if( streamSize() > 0 && (mCurOffset+124 >= streamSize() ) )
         endOfData();
 }
 

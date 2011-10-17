@@ -117,6 +117,14 @@ void PhononYoutubePlayer::TooglePlay() {
 void PhononYoutubePlayer::Stop() {
     mMedia->stop();
     mMedia->clear();
+    // well, i belive this solved a freeze problem :)
+    // I'm not sure exacly why, but I belive Phonon did not like it then
+    // you stoped a video and started playing a new one right after,
+    // some kind of ennoying deadlock occured
+    // Okay, so this does not fully solves it, but... its ALOT rarer now,
+    // And i belive I have a memory leak somethere, not sure were, it does not seem
+    // to want to crash then running in a debuger :(
+    usleep(5000);
 }
 
 void PhononYoutubePlayer::readyReadError() {
@@ -196,9 +204,11 @@ void PhononYoutubePlayer::PlayVideo(QString ID) {
 
 
 
-    mStream = new VideoStreamer(Urls,NetworkMgr,this);
-    /*mStream = new YoutubeStream(this);
-    mStream->setStream( getYoutubeStream(ID) );
+    mStream = new VideoStreamer(Urls,this);
+    /*QFile *File = new QFile("Test", this);
+    File->open(QIODevice::ReadWrite);
+    mStream = new YoutubeStream(this);
+    mStream->setStream( getYoutubeStream(ID), File );
     mStream->startStream();*/
 
     Phonon::MediaSource Source(mStream);

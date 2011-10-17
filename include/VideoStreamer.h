@@ -27,11 +27,11 @@ typedef QList<QUrl> QUrlList;
 class VideoStreamer : public Phonon::AbstractMediaStream {
     Q_OBJECT
 public:
-    VideoStreamer( QUrl VideoUrl, QNetworkAccessManager *NetworkMgr, QObject *Parent = 0 );
+    VideoStreamer( QUrl VideoUrl, QObject *Parent = 0 );
     /// All the urls in VideoUrls should point at the same video, AKA it's NOT a playlist
     /// If we can't get a stream out of the first on, we tries the second one
     /// and if it still does not work we tries the third one and so on...
-    VideoStreamer( QUrlList VideoUrls, QNetworkAccessManager *NetworkMgr, QObject* Parent = 0 );
+    VideoStreamer( QUrlList VideoUrls, QObject* Parent = 0 );
 
 
 
@@ -86,4 +86,5 @@ protected slots:
 
     void ReadyRead();
 };
+
 #endif // VIDEOSTREAMER_H

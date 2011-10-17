@@ -3,9 +3,14 @@
 
 #include <QDialog>
 
+
 namespace Ui {
-    class DownloadDialog;
+    class Dialog;
 }
+
+struct DownloadInfo {
+
+};
 
 class DownloadDialog : public QDialog
 {
@@ -15,8 +20,10 @@ public:
     explicit DownloadDialog(QWidget *parent = 0);
     ~DownloadDialog();
 
+
+    void setVideoID( QString ID );
 private:
-    Ui::DownloadDialog *ui;
+    Ui::Dialog *ui;
 };
 
 #endif // DOWNLOADDIALOG_H

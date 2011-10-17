@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Thumnails.NetworkMgr = &mNetworkMgr;
 
+    mDownload = new DownloadDialog(this);
+
     {/// Connect all the signals to the slots...
         connect( ui->Search_Button, SIGNAL(clicked()),              SLOT(SearchButton_Clicked()) );
         connect( ui->Search_Input,  SIGNAL(textChanged(QString)),   SLOT(InputChanged(QString)) );
@@ -45,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
         connect( ui->ItemView,      SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(ItemDoubleClicked(QListWidgetItem*)) );
         connect( ui->ItemContent,   SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(ItemDoubleClicked(QListWidgetItem*)) );
 
-        connect( ui->Play_Button,   SIGNAL(clicked()), SLOT(Play_Clicked()) );
+        connect( ui->Play_Button,   	SIGNAL(clicked()), SLOT(Play_Clicked()) );
+        connect( ui->Download_Button,	SIGNAL(clicked()),  SLOT(Download_Clicked()) );
     }
 
     mPlayer = new PhononYoutubePlayer(0);
@@ -343,4 +346,13 @@ void MainWindow::Play_Clicked()
         mPlayer->PlayVideo( mCurrentSel->getInfo()->ID );
         mPlayer->show();
     }
+}
+
+void MainWindow::Download_Clicked()
+{
+    if( mCurrentSel && mCurrentSel->getInfo()->getType() == IT_VideoInfo ) {
+        mDownload->show();
+        mDownload->exec();
+    }
+
 }
